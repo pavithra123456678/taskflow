@@ -3,15 +3,16 @@ const Task = require("../models/Task");
 // ➕ Create Task
 exports.createTask = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, subtasks } = req.body;
 
     const task = await Task.create({
       user: req.user._id,
       title,
       description,
+      subtasks: Array.isArray(subtasks) ? subtasks.map(st => ({ title: st.title, completed: !!st.completed })) : [],
     });
 
-    res.status(201).json(task);
+    res.status(201).json({ task });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -70,13 +71,19 @@ exports.updateTask = async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
     }
 
+    // Allow updating fields including `subtasks`. We sanitize subtasks if present.
+    const updates = { ...req.body };
+    if (updates.subtasks && Array.isArray(updates.subtasks)) {
+      updates.subtasks = updates.subtasks.map(st => ({ title: st.title, completed: !!st.completed }));
+    }
+
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       { new: true }
     );
 
-    res.json(updatedTask);
+    res.json({ task: updatedTask });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
