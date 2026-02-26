@@ -130,6 +130,7 @@ exports.forgotPassword = async (req, res) => {
 
       return res.json(responsePayload);
   } catch (error) {
+    console.error("Forgot password error:", error);
     res.status(500).json({ message: 'Server error', error });
   }
 };
