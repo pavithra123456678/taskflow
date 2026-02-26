@@ -7,7 +7,9 @@ const rateLimit = require("express-rate-limit");
 
 dotenv.config({ path: path.join(__dirname, ".env") });
 
+
 const app = express();
+app.set("trust proxy", 1); // Enable trust proxy for rate limiter on Render
 
 // Middleware
 app.use(cors());
